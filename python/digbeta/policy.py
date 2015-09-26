@@ -67,7 +67,7 @@ class UCB(klUCB):
     set (optimally) to 1/2 rather than 2.
   
     Note that UCB is implemented as a special case of klUCB for the divergence 
-    corresponding to the Gaussian distributions, see [Garivier & Cappé - COLT, 2011].
+    corresponding to the Gaussian distributions, see [Garivier & Cappe - COLT, 2011].
     """
     def __init__(self, num_arms):
         klUCB.__init__(self, num_arms, lambda x, d, sig2: kullback.klucbGauss(x, d, .25))
@@ -79,13 +79,21 @@ def clopper_pearson(k, n, alpha=0.95):
     alpha confidence intervals for a binomial distribution of k expected successes on n trials
     Clopper Pearson intervals are a conservative estimate.
     """
-    lo = scipy.stats.beta.ppf(alpha/2, k, n-k+1)
-    hi = scipy.stats.beta.ppf(1 - alpha/2, k+1, n-k)
+
+    """Explicitly check the corner cases when all trials gave the same result to avoid undefined results."""
+    if k == 0:
+        lo = 0
+    else:
+        lo = scipy.stats.beta.ppf(alpha/2, k, n-k+1)
+    if k == n:
+        hi = 1
+    else:
+        hi = scipy.stats.beta.ppf(1 - alpha/2, k+1, n-k)
     return lo, hi
 
 class CPUCB(Policy):
     """Clopper-Pearson UCB
-    [Garivier & Cappé, COLT 2011]
+    [Garivier & Cappe, COLT 2011]
     """
     def __init__(self, num_arms, c=1.01):
         """c is the parameter of the UCB"""
